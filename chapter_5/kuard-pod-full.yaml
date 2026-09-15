@@ -1,0 +1,44 @@
+apiVersion: v1                      # Uses the core Kubernetes API
+kind: Pod                           # Defines a Pod (smallest deployable unit in K8s)
+metadata:                           # Descriptive info about the Pod
+  name: kuard                       # Name of the Pod (for identification)
+spec:                               # Specifications for the Pod's behavior
+  volumes:                          # Defines storage volumes for the Pod
+    - name: "kuard-data"            # Name of the volume
+      hostPath:                     # Uses a directory from the worker node's filesystem  
+        path: "/var/lib/kuard"       # Path on the node's disk
+  containers:                       # List of containers in the Pod
+  - image: gcr.io/kuar-demo/kuard-amd64:blue  # Container image
+    name: kuard                     # Name of the container  
+    ports:                          # Network ports the container exposes
+      - containerPort: 8080         # Port number
+        name: http                  # Name for the port (useful for service discovery)
+        protocol: TCP               # Network protocol
+    resources:
+        requests:                   #request for resources
+          #The Pod will not be scheduled on a node that does not have at least these resources available
+          cpu: "500m"               #500 milliCPU, or half a CPU core
+          memory: "128Mi"           #128 MiB of memory
+        limits:                     #cap for resources
+          #he kernel is configured to ensure that consumption cannot exceed these limits
+          cpu: "1000m"              #1000 milliCPU, or 1 CPU core
+          memory: "256Mi"           #256 MiB of memory
+    volumeMounts:                   # Mounts the volume into the container
+      - mountPath: "/data"          # Path inside the container
+        name: "kuard-data"          # References the volume defined above
+    livenessProbe:
+      httpGet:                      # to perform an HTTP GET request against the /healthy endpoint on port 8080
+        path: /healthy 
+        port: 8080
+      initialDelaySeconds: 5        #will not be called until 5 seconds after all the containers in the Pod are created
+      timeoutSeconds: 1             #The probe must respond within the 1-second timeout
+      periodSeconds: 10             #Kubernetes will call the probe every 10 seconds
+      failureThreshold: 3           #If more than three consecutive probes fail, the container will fail and restart
+    readinessProbe: 
+      httpGet:                      # to perform an HTTP GET request against the /ready endpoint on port 8080
+        path: /ready
+        port: 8080 
+      initialDelaySeconds: 30 
+      timeoutSeconds: 1 
+      periodSeconds: 10 
+      failureThreshold: 3

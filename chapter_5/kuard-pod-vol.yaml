@@ -1,0 +1,19 @@
+apiVersion: v1 
+kind: Pod 
+metadata:  #section for describing the Pod and its labels
+  name: kuard 
+spec:                               # Specifications for the Pod's behavior
+  volumes:                          # Defines storage volumes for the Pod
+    - name: "kuard-data"            # Name of the volume
+      hostPath:                     # Uses a directory from the worker node's filesystem  
+        path: "/var/lib/kuard"       # Path on the node's disk
+  containers:                       # List of containers in the Pod         
+  - image: gcr.io/kuar-demo/kuard-amd64:blue  # Container image
+    name: kuard                     # Name of the container  
+    volumeMounts:                   # Mounts the volume into the container
+      - mountPath: "/data"          # Path inside the container
+        name: "kuard-data"          # References the volume defined above
+    ports:                          # Network ports the container exposes
+      - containerPort: 8080         # Port number
+        name: http                  # Name for the port (useful for service discovery)
+        protocol: TCP               # Network protocol

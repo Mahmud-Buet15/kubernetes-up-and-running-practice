@@ -1,0 +1,12 @@
+apiVersion: v1          # Uses the core Kubernetes API
+kind: Pod               # Defines a Pod (smallest deployable unit in K8s)
+metadata:               # Descriptive info about the Pod
+  name: kuard           # Name of the Pod (for identification)
+spec:      # Specifications for the Pod's behavior
+  containers:           # List of containers in the Pod
+  - image: gcr.io/kuar-demo/kuard-amd64:blue  # Container image
+    name: kuard         # Name of the container  
+    ports:              # Network ports the container exposes
+      - containerPort: 8080  # Port number
+        name: http      # Name for the port (useful for service discovery)
+        protocol: TCP   # Network protocol

@@ -1,0 +1,20 @@
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name: kuard 
+spec:
+  containers:
+    - image: gcr.io/kuar-demo/kuard-amd64:blue
+      name: kuard 
+      livenessProbe:
+        httpGet:      # to perform an HTTP GET request against the /healthy endpoint on port 8080
+          path: /healthy 
+          port: 8080
+        initialDelaySeconds: 5  #will not be called until 5 seconds after all the containers in the Pod are created
+        timeoutSeconds: 1   #The probe must respond within the 1-second timeout
+        periodSeconds: 10  #Kubernetes will call the probe every 10 seconds
+        failureThreshold: 3 #If more than three consecutive probes fail, the container will fail and restart
+      ports:
+        - containerPort: 8080
+          name: http 
+          protocol: TCP
